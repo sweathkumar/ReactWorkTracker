@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Plan Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+  <div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold text-center mb-6">40-Day JavaScript & React Learning Plan</h1>
+    
+    <!-- Dashboard -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+      <h2 class="text-2xl font-semibold mb-4">Dashboard</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-blue-100 p-4 rounded-lg">
+          <h3 class="text-lg font-medium">Days Completed</h3>
+          <p id="days-completed" class="text-2xl font-bold">0</p>
+        </div>
+        <div class="bg-green-100 p-4 rounded-lg">
+          <h3 class="text-lg font-medium">Progress</h3>
+          <p id="progress-percent" class="text-2xl font-bold">0%</p>
+        </div>
+        <div class="bg-yellow-100 p-4 rounded-lg">
+          <h3 class="text-lg font-medium">Achievements</h3>
+          <p id="achievements-count" class="text-2xl font-bold">0</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar View -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-2xl font-semibold mb-4">Learning Plan Calendar</h2>
+      <div id="calendar" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"></div>
+    </div>
+
+    <!-- Achievements List -->
+    <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+      <h2 class="text-2xl font-semibold mb-4">Achievements</h2>
+      <ul id="achievements-list" class="list-disc pl-6"></ul>
+    </div>
+  </div>
+
+  <script>
+    // Learning plan data
+    const learningPlan = [
+      { date: "2025-06-01", topic: "let, const vs var; Primitive types; Type coercion; Operators" },
+      { date: "2025-06-02", topic: "Functions, Arrow functions, Return, Scope" },
+      { date: "2025-06-03", topic: "Arrays: push/pop, map, filter, reduce" },
+      { date: "2025-06-04", topic: "Objects, Dot/Bracket notation, Destructuring" },
+      { date: "2025-06-05", topic: "Loops: for, while, for...of, for...in" },
+      { date: "2025-06-06", topic: "DOM Selectors, Changing text/style/attributes" },
+      { date: "2025-06-07", topic: "Event listeners, Input handling" },
+      { date: "2025-06-08", topic: "fetch API, Promises, async/await" },
+      { date: "2025-06-09", topic: "Mini Project: To-Do or Expense Tracker" },
+      { date: "2025-06-10", topic: "JS Recap + Git Basics" },
+      { date: "2025-06-11", topic: "What is React, Setup, File structure" },
+      { date: "2025-06-12", topic: "JSX syntax, Component creation" },
+      { date: "2025-06-13", topic: "Props passing and usage" },
+      { date: "2025-06-14", topic: "useState, Re-rendering" },
+      { date: "2025-06-15", topic: "Event handling in React" },
+      { date: "2025-06-16", topic: "Rendering lists with map, key prop" },
+      { date: "2025-06-17", topic: "Conditional rendering: &&, ternary" },
+      { date: "2025-06-18", topic: "Controlled Inputs, Forms" },
+      { date: "2025-06-19", topic: "Mini Project: Dynamic To-Do List" },
+      { date: "2025-06-20", topic: "Refactor + Push to GitHub" },
+      { date: "2025-06-21", topic: "useEffect basics, Dependency array" },
+      { date: "2025-06-22", topic: "API fetch in useEffect, Error/Loading states" },
+      { date: "2025-06-23", topic: "React Router: Setup, Routes" },
+      { date: "2025-06-24", topic: "Dynamic Routes, useParams" },
+      { date: "2025-06-25", topic: "Lifting state, Reusable components" },
+      { date: "2025-06-26", topic: "Context API: createContext, useContext" },
+      { date: "2025-06-27", topic: "Start Blog/Weather App - Setup" },
+      { date: "2025-06-28", topic: "Add UI + Routing" },
+      { date: "2025-06-29", topic: "Connect API, State mgmt" },
+      { date: "2025-06-30", topic: "Finalize project + Deploy" },
+      { date: "2025-07-01", topic: "Tailwind CSS: Basic classes" },
+      { date: "2025-07-02", topic: "Flexbox/Grid, Responsive design" },
+      { date: "2025-07-03", topic: "Theme Switcher with useContext" },
+      { date: "2025-07-04", topic: "Start Portfolio: Home/About" },
+      { date: "2025-07-05", topic: "Routing + Projects section" },
+      { date: "2025-07-06", topic: "Add content, contact form, style" },
+      { date: "2025-07-07", topic: "Final cleanup + Deploy" },
+      { date: "2025-07-08", topic: "GitHub README + Polish Projects" },
+      { date: "2025-07-09", topic: "Apply for jobs + LinkedIn" },
+      { date: "2025-07-10", topic: "Final Day: Keep building!" }
+    ];
+
+    // Achievements for key milestones
+    const achievements = [
+      { day: 9, title: "Completed To-Do/Expense Tracker Mini Project", earned: false },
+      { day: 19, title: "Completed Dynamic To-Do List Mini Project", earned: false },
+      { day: 30, title: "Deployed Blog/Weather App", earned: false },
+      { day: 37, title: "Deployed Portfolio", earned: false },
+      { day: 40, title: "Completed 40-Day Learning Plan!", earned: false }
+    ];
+
+    // Current date (for demo, using provided date)
+    const currentDate = new Date("2025-06-01T07:05:00+05:30");
+
+    // Calculate progress
+    function calculateProgress() {
+      const totalDays = learningPlan.length;
+      const completedDays = learningPlan.filter(item => new Date(item.date) <= currentDate).length;
+      const progressPercent = Math.round((completedDays / totalDays) * 100);
+
+      document.getElementById("days-completed").textContent = completedDays;
+      document.getElementById("progress-percent").textContent = `${progressPercent}%`;
+
+      // Update achievements
+      let earnedAchievements = 0;
+      achievements.forEach(achievement => {
+        if (completedDays >= achievement.day) {
+          achievement.earned = true;
+          earnedAchievements++;
+        }
+      });
+      document.getElementById("achievements-count").textContent = earnedAchievements;
+
+      // Render achievements
+      const achievementsList = document.getElementById("achievements-list");
+      achievementsList.innerHTML = "";
+      achievements.forEach(achievement => {
+        const li = document.createElement("li");
+        li.textContent = achievement.title;
+        li.className = achievement.earned ? "text-green-600" : "text-gray-400";
+        achievementsList.appendChild(li);
+      });
+    }
+
+    // Render calendar
+    function renderCalendar() {
+      const calendar = document.getElementById("calendar");
+      learningPlan.forEach((item, index) => {
+        const dayDiv = document.createElement("div");
+        const isCompleted = new Date(item.date) <= currentDate;
+        dayDiv.className = `p-4 rounded-lg ${isCompleted ? "bg-green-100" : "bg-gray-200"}`;
+        dayDiv.innerHTML = `
+          <h3 class="font-semibold">Day ${index + 1} - ${item.date}</h3>
+          <p>${item.topic}</p>
+        `;
+        calendar.appendChild(dayDiv);
+      });
+    }
+
+    // Initialize
+    calculateProgress();
+    renderCalendar();
+  </script>
+</body>
+</html>
